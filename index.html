@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.I.M. Digital | Sistema de Inspeção MS</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root { --primary: #1a4d2e; --secondary: #003366; --accent: #b8860b; --bg: #f1f5f9; }
+        
+        body { font-family: 'Open Sans', sans-serif; margin: 0; background: var(--bg); color: #1e293b; }
+
+        /* HEADER */
+        header { 
+            background: #fff; padding: 15px 5%; display: flex; justify-content: space-between; 
+            align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top:0; z-index:100;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--secondary); text-decoration: none; }
+        .logo span { color: var(--primary); }
+
+        /* HERO */
+        .hero { 
+            background: linear-gradient(rgba(0,51,102,0.85), rgba(26,77,46,0.85)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover; color: white; padding: 60px 5% 100px; text-align: center;
+        }
+
+        /* CARDS HOME */
+        .container-servicos { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 0 5%; margin-top: -50px; }
+        .card-servico { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; }
+        .card-servico:hover { transform: translateY(-10px); }
+        .card-servico i { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; }
+
+        /* MODAL LOGIN */
+        #modalLogin { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 35px; border-radius: 12px; width: 320px; text-align: center; }
+
+        /* PAINEL SISTEMA */
+        #painelSistema { display: none; padding: 30px 5%; animation: fadeIn 0.4s; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
+        .secao-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+
+        /* FORMULÁRIOS */
+        label { display: block; margin-top: 12px; font-weight: 600; font-size: 0.85rem; color: #475569; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; }
+        .btn-primario { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-weight: 700; cursor: pointer; margin-top: 15px; }
+        
+        /* SELO PROFISSIONAL (ESTILO GOVERNAMENTAL) */
+        #containerSeloParaImpressao { 
+            display: none; border: 8px double var(--primary); padding: 30px; background: white; 
+            text-align: center; position: relative; margin-top: 20px;
+        }
+        .selo-header { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 15px; }
+        .selo-corpo h2 { font-family: 'Montserrat'; text-transform: uppercase; margin: 15px 0; color: var(--secondary); }
+        .faixa-registro { background: var(--primary); color: white; padding: 12px; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
+
+        /* TABELA DE HISTÓRICO */
+        .historico-tabela { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        .historico-tabela th { background: #f8fafc; text-align: left; padding: 10px; border-bottom: 2px solid #e2e8f0; }
+        .historico-tabela td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        .btn-mini { padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; color: white; font-size: 0.7rem; margin-right: 3px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #containerSeloParaImpressao, #containerSeloParaImpressao * { visibility: visible; }
+            #containerSeloParaImpressao { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+            .btn-print { display: none; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div id="view-publica">
+        <header>
+            <a href="#" class="logo">S.I.M.<span>Digital</span></a>
+            <button class="btn-primario" style="width:auto; padding:10px 25px;" onclick="abrirLogin()">ACESSO RESTRITO</button>
+        </header>
+        <section class="hero">
+            <h1>Sistema de Inspeção Municipal</h1>
+            <p>Governo do Estado do Mato Grosso do Sul - Gestão de Alimentos</p>
+        </section>
+        <div class="container-servicos">
+            <div class="card-servico" onclick="abrirLogin()"><i class="fas fa-satellite-dish"></i><h3>Geo-Fiscalização</h3><p>Registro em tempo real com auditoria GPS.</p></div>
+            <div class="card-servico" onclick="abrirLogin()"><i class="fas fa-file-contract"></i><h3>Emissão de Selo</h3><p>Certificação profissional de agroindústrias.</p></div>
+            <div class="card-servico" onclick="abrirLogin()"><i class="fas fa-user-check"></i><h3>Área do Servidor</h3><p>Painel de controle e histórico de vistorias.</p></div>
+        </div>
+    </div>
+
+    <div id="modalLogin">
+        <div class="login-box">
+            <i class="fas fa-shield-alt" style="font-size: 3rem; color: var(--secondary); margin-bottom: 15px;"></i>
+            <h3>Login Administrativo</h3>
+            <input type="text" id="user" placeholder="Usuário (admin)">
+            <input type="password" id="pass" placeholder="Senha (123)">
+            <button class="btn-primario" onclick="Sistema.login()">ENTRAR NO SISTEMA</button>
+            <p onclick="document.getElementById('modalLogin').style.display='none'" style="color:red; cursor:pointer; margin-top:20px; font-weight:bold;">VOLTAR</p>
+        </div>
+    </div>
+
+    <div id="painelSistema">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="color:var(--secondary)"><i class="fas fa-database"></i> Painel Operacional</h2>
+            <button onclick="location.reload()" style="background:red; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">LOGOUT</button>
+        </div>
+
+        <div class="grid-layout">
+            <div>
+                <div class="secao-card">
+                    <h3><i class="fas fa-user-edit"></i> Dados do Servidor</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label>Nome do Servidor:</label>
+                            <input type="text" id="srv_nome" placeholder="Ex: João Silva">
+                        </div>
+                        <div>
+                            <label>Matrícula/ID:</label>
+                            <input type="text" id="srv_id" placeholder="Ex: 8829-MS">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="secao-card">
+                    <h3><i class="fas fa-building"></i> Dados da Empresa & Local</h3>
+                    <div id="mapaBox" style="height:180px; background:#ddd; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; justify-content:center;">
+                        <iframe id="mapaIframe" width="100%" height="100%" frameborder="0" style="display:none;"></iframe>
+                        <span id="mapaMsg">Sincronizando GPS...</span>
+                    </div>
+                    
+                    <input type="hidden" id="edit_index" value="-1">
+                    <label>Razão Social:</label>
+                    <input type="text" id="emp_nome" placeholder="Nome da Empresa">
+                    <label>CNPJ / Registro:</label>
+                    <input type="text" id="emp_doc" placeholder="00.000.000/0000-00">
+                    <label>Parecer Técnico:</label>
+                    <select id="emp_status">
+                        <option value="REGULAR">✅ APROVADO / REGULAR</option>
+                        <option value="IRREGULAR">❌ IRREGULAR / NOTIFICADO</option>
+                        <option value="PENDENTE">⚠️ EM ADEQUAÇÃO</option>
+                    </select>
+                    
+                    <button class="btn-primario" id="btnSalvar" onclick="Sistema.salvarVistoria()">SALVAR REGISTRO DE CAMPO</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="secao-card">
+                    <h3><i class="fas fa-stamp"></i> Gerador de Selo Profissional</h3>
+                    <input type="text" id="selo_nome" placeholder="Nome da Empresa no Selo">
+                    <input type="text" id="selo_n" placeholder="Nº Registro (Ex: 0045/MS)">
+                    <button class="btn-primario" style="background:var(--secondary)" onclick="Sistema.gerarSelo()">VISUALIZAR E PREPARAR SELO</button>
+
+                    <div id="containerSeloParaImpressao">
+                        <div class="selo-header">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Bras%C3%A3o_do_Mato_Grosso_do_Sul.svg/1200px-Bras%C3%A3o_do_Mato_Grosso_do_Sul.svg.png" style="height:60px;">
+                            <p style="margin:5px 0; font-size:0.7rem; font-weight:bold;">ESTADO DO MATO GROSSO DO SUL<br>SISTEMA DE INSPEÇÃO MUNICIPAL - S.I.M.</p>
+                        </div>
+                        <div class="selo-corpo">
+                            <h2 id="d_selo_nome">---</h2>
+                            <div class="faixa-registro">REGISTRO S.I.M. <span id="d_selo_n">0000</span></div>
+                            <img id="d_selo_qr" style="width:120px; margin-top:20px;">
+                            <p style="font-size:0.6rem; color:#555; margin-top:10px;">Documento assinado digitalmente conforme localidade GPS registrada no sistema.</p>
+                        </div>
+                        <button class="btn-primario btn-print" style="background:#000" onclick="window.print()">IMPRIMIR OU SALVAR PDF</button>
+                    </div>
+                </div>
+
+                <div class="secao-card">
+                    <h3><i class="fas fa-history"></i> Histórico de Vistorias (Auditoria)</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="historico-tabela">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Empresa</th>
+                                    <th>Servidor</th>
+                                    <th>GPS</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabela"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const Sistema = {
+            vistorias: JSON.parse(localStorage.getItem('sim_data')) || [],
+            gpsAtual: "0, 0",
+
+            login() {
+                if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === '123') {
+                    document.getElementById('view-publica').style.display = 'none';
+                    document.getElementById('modalLogin').style.display = 'none';
+                    document.getElementById('painelSistema').style.display = 'block';
+                    this.ativarGPS();
+                    this.atualizarTabela();
+                } else { alert("Acesso Negado!"); }
+            },
+
+            ativarGPS() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(p => {
+                        this.gpsAtual = `${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}`;
+                        const iframe = document.getElementById('mapaIframe');
+                        iframe.src = `https://maps.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}&z=15&output=embed`;
+                        iframe.style.display = 'block';
+                        document.getElementById('mapaMsg').style.display = 'none';
+                    });
+                }
+            },
+
+            salvarVistoria() {
+                const index = document.getElementById('edit_index').value;
+                const novaVistoria = {
+                    data: new Date().toLocaleString(),
+                    empresa: document.getElementById('emp_nome').value,
+                    doc: document.getElementById('emp_doc').value,
+                    status: document.getElementById('emp_status').value,
+                    servidor: document.getElementById('srv_nome').value,
+                    srv_id: document.getElementById('srv_id').value,
+                    gps: this.gpsAtual
+                };
+
+                if(!novaVistoria.empresa || !novaVistoria.servidor) return alert("Preencha todos os campos!");
+
+                if(index === "-1") {
+                    this.vistorias.unshift(novaVistoria);
+                } else {
+                    this.vistorias[index] = novaVistoria;
+                    document.getElementById('edit_index').value = "-1";
+                    document.getElementById('btnSalvar').innerText = "SALVAR REGISTRO DE CAMPO";
+                }
+
+                localStorage.setItem('sim_data', JSON.stringify(this.vistorias));
+                this.atualizarTabela();
+                this.limparForm();
+                alert("Dados persistidos com sucesso!");
+            },
+
+            atualizarTabela() {
+                const tbody = document.getElementById('corpoTabela');
+                tbody.innerHTML = this.vistorias.map((v, i) => `
+                    <tr>
+                        <td>${v.data}</td>
+                        <td><b>${v.empresa}</b></td>
+                        <td>${v.servidor}</td>
+                        <td style="color:green; font-weight:bold">${v.gps}</td>
+                        <td>
+                            <button class="btn-mini" style="background:#3b82f6" onclick="Sistema.editar(${i})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-mini" style="background:red" onclick="Sistema.excluir(${i})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            },
+
+            editar(index) {
+                const v = this.vistorias[index];
+                document.getElementById('emp_nome').value = v.empresa;
+                document.getElementById('emp_doc').value = v.doc;
+                document.getElementById('emp_status').value = v.status;
+                document.getElementById('srv_nome').value = v.servidor;
+                document.getElementById('srv_id').value = v.srv_id;
+                document.getElementById('edit_index').value = index;
+                document.getElementById('btnSalvar').innerText = "ATUALIZAR VISTORIA";
+                window.scrollTo(0,0);
+            },
+
+            excluir(index) {
+                if(confirm("Deseja apagar este registro permanentemente?")) {
+                    this.vistorias.splice(index, 1);
+                    localStorage.setItem('sim_data', JSON.stringify(this.vistorias));
+                    this.atualizarTabela();
+                }
+            },
+
+            limparForm() {
+                document.getElementById('emp_nome').value = "";
+                document.getElementById('emp_doc').value = "";
+            },
+
+            gerarSelo() {
+                const nome = document.getElementById('selo_nome').value;
+                const reg = document.getElementById('selo_n').value;
+                if(!nome) return alert("Digite o nome da empresa!");
+
+                document.getElementById('d_selo_nome').innerText = nome;
+                document.getElementById('d_selo_n').innerText = reg || "----";
+                document.getElementById('d_selo_qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VALIDACAO-SIM-MS-${nome}-${reg}`;
+                document.getElementById('containerSeloParaImpressao').style.display = 'block';
+            }
+        };
+
+        function abrirLogin() { document.getElementById('modalLogin').style.display = 'flex'; }
+    </script>
+</body>
+</html>
